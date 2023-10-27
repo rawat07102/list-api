@@ -1,5 +1,7 @@
 import { Router } from "express"
-import { login } from "../controllers/user.controllers.js"
+import { login, signup } from "../controllers/user.controllers.js"
+
 export const userRoutes = Router()
 
+userRoutes.post("/signup", signup)
 userRoutes.post("/login", login)

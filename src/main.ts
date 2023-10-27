@@ -1,11 +1,18 @@
+import { envVars } from "./lib/envVars.js"
 import express from "express"
 import { playlistRoutes } from "./routes/playlist.routes.js"
 import { userRoutes } from "./routes/user.routes.js"
+import { connect as MongooseConnect } from "mongoose"
 
-const PORT = 4000
+const { PORT, MONGO_URI } = envVars
 const app = express()
 
 app.use("/playlist", playlistRoutes)
 app.use("/user", userRoutes)
 
-app.listen(PORT, () => console.log("running on port " + PORT))
+async function main() {
+    await MongooseConnect(MONGO_URI)
+    app.listen(PORT, () => console.log("running on port " + PORT))
+}
+
+main()

@@ -19,4 +19,4 @@ const userSchema = new Schema<IUserModel>({
     ],
 })
 
-export const PlaylistModel = model<IUserModel>("User", userSchema)
+export const UserModel = model<IUserModel>("User", userSchema)
