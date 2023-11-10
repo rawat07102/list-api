@@ -6,6 +6,15 @@ import { IAuthPayload } from "../lib/authGuard.js"
 import { userCredsSchema } from "../schemas/user.schemas.js"
 import { validateWithSchema } from "../lib/validateZodSchema.js"
 
+export async function getUserById(req: Request) {
+    const { id } = req.params
+    const user = await UserModel.findById(id).select("-password")
+    if (!user) {
+        throw new Error("User not found with given id")
+    }
+    return user
+}
+
 export async function getAuthenticatedUser(payload: IAuthPayload | undefined) {
     if (!payload) {
         throw new Error("Un-Authenticated")
