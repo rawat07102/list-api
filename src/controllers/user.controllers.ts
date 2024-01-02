@@ -64,7 +64,6 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         if (!user) {
             throw new Error("Invalid user credentials")
         }
-        let token: string | undefined
         jwt.sign(
             {
                 username,
@@ -73,12 +72,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
             envVars.JWT_SECRET,
             (err: Error | null, encoded: string | undefined) => {
                 if (err) throw err
-                token = encoded
+                let accessToken = encoded
+                return res.json({
+                    accessToken,
+                })
             }
         )
-        return res.json({
-            token,
-        })
     } catch (err) {
         next(err)
     }

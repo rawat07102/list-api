@@ -1,13 +1,13 @@
 import { Schema, model, Types } from "mongoose"
 
 export interface IUserModel {
-    name: string
+    username: string
     password: string
     playlists: Types.ObjectId[]
 }
 
 const userSchema = new Schema<IUserModel>({
-    name: { type: String, required: true },
+    username: { type: String, required: true },
     password: { type: String, required: true },
     playlists: [
         {

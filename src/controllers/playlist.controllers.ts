@@ -7,10 +7,15 @@ import {
     addVideoToPlaylistSchema,
 } from "../schemas/playlist.schemas.js"
 
-type getAllPlaylistRequest = Request<any, any, any, {
-    limit?: string
-    skip?: string
-}>
+type getAllPlaylistRequest = Request<
+    any,
+    any,
+    any,
+    {
+        limit?: string
+        skip?: string
+    }
+>
 
 export async function getAllPlaylist(req: getAllPlaylistRequest) {
     const { limit = "10", skip = "0" } = req.query
@@ -68,7 +73,7 @@ export async function deletePlaylist(req: Request) {
     if (!playlist) {
         throw Error("Playlist not found")
     }
-    user.playlists.filter(p => p.id !== playlist.id)
+    user.playlists.filter((p) => p.id !== playlist.id)
     await user.save()
     return playlist.id
 }
@@ -106,7 +111,7 @@ export async function removeVideoFromPlaylist(req: Request) {
     if (!playlist) {
         throw Error("Playlist not found")
     }
-    playlist.videos = playlist.videos.filter(v => v !== videoId)
+    playlist.videos = playlist.videos.filter((v) => v !== videoId)
     await playlist.save()
     return playlist.id
 }
