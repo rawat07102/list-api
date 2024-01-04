@@ -1,15 +1,22 @@
-import { Schema, model, Types } from "mongoose"
+import { Schema, model, InferSchemaType } from "mongoose"
 
-export interface IPlaylistModel {
-    name: string
-    creator: Types.ObjectId
-    videos: string[]
-}
+// export interface Playlist {
+//     name: string
+//     creator: Types.ObjectId
+//     videos: string[]
+// }
 
-const playlistSchema = new Schema<IPlaylistModel>({
-    name: { type: String, required: true },
-    creator: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    videos: [{type: String, default: []}]
-})
+const playlistSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        creator: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+        videos: [{ type: String, default: [] }],
+        viewsCount: { type: Number, default: 0 },
+        thumbnail: { type: Schema.Types.ObjectId, ref: "Image" },
+    },
+    { timestamps: true }
+)
 
-export const PlaylistModel = model<IPlaylistModel>("Playlist", playlistSchema)
+export type Playlist = InferSchemaType<typeof playlistSchema>
+
+export const PlaylistModel = model<Playlist>("Playlist", playlistSchema)

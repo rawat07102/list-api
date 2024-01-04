@@ -10,7 +10,8 @@ const envSchema = z.object({
     MONGO_URI: z.string(),
     PORT: z.coerce.number().default(4000),
     NODE_ENV: z.enum(["development", "production"]).default("development"),
-    JWT_SECRET: z.string()
+    JWT_SECRET: z.string(),
+    CLIENT_ORIGIN: z.string(),
 })
 
 const envParseResult = envSchema.safeParse(process.env)

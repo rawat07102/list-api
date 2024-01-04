@@ -1,4 +1,4 @@
-import { Request } from "express"
+import { NextFunction, Request, Response } from "express"
 import { PlaylistModel } from "../models/playlist.model.js"
 import { getAuthenticatedUser } from "./user.controllers.js"
 import { validateWithSchema } from "../lib/validateZodSchema.js"
@@ -6,6 +6,7 @@ import {
     renamePlaylistSchema,
     addVideoToPlaylistSchema,
 } from "../schemas/playlist.schemas.js"
+import { ImageModel } from "../models/image.model.js"
 
 type getAllPlaylistRequest = Request<
     any,
@@ -17,37 +18,65 @@ type getAllPlaylistRequest = Request<
     }
 >
 
-export async function getAllPlaylist(req: getAllPlaylistRequest) {
+export async function uploadThumbnail(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        const playlistId = req.params.id
+        if (!req.file) {
+            throw new Error("No File Found")
+        }
+        const playlist = await PlaylistModel.findById(playlistId).orFail()
+        const { buffer, mimetype } = req.file
+        const thumbnail = new ImageModel({
+            data: buffer.toString("base64"),
+            mimetype,
+        })
+        if (playlist.thumbnail) {
+            await ImageModel.findByIdAndDelete(playlist.thumbnail)
+        }
+        playlist.thumbnail = thumbnail.id
+        await thumbnail.save()
+        await playlist.save()
+        return res.json(thumbnail.id)
+    } catch (err) {
+        next(err)
+    }
+}
+
+export async function getAllPlaylist(
+    req: getAllPlaylistRequest,
+    res: Response
+) {
     const { limit = "10", skip = "0" } = req.query
-    const playlists = PlaylistModel.find()
+    const playlists = await PlaylistModel.find()
         .limit(parseInt(limit))
         .skip(parseInt(skip))
         .exec()
-    return playlists
+    return res.json(playlists)
 }
 
-export async function getPlaylist(req: Request) {
+export async function getPlaylist(req: Request, res: Response) {
     const { id } = req.params
-    const playlist = await PlaylistModel.findById(id)
-    if (!playlist) {
-        throw new Error("Playlist not found")
-    }
-    return playlist
+    const playlist = await PlaylistModel.findById(id).orFail()
+    return res.json(playlist)
 }
 
-export async function createNewPlaylist(req: Request) {
+export async function createNewPlaylist(req: Request, res: Response) {
     const user = await getAuthenticatedUser(req.user)
     const newPlaylist = await PlaylistModel.create({
-        name: user.playlists.length,
+        name: "Playlist #" + user.playlists.length,
         creator: user,
     })
     user.playlists.push(newPlaylist.id)
     await newPlaylist.save()
     await user.save()
-    return newPlaylist
+    return res.json(newPlaylist)
 }
 
-export async function renamePlaylist(req: Request) {
+export async function renamePlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
     const { name } = await validateWithSchema(req.body, renamePlaylistSchema)
@@ -60,10 +89,10 @@ export async function renamePlaylist(req: Request) {
     }
     playlist.name = name
     await playlist.save()
-    return playlist.id
+    return res.json(playlist.id)
 }
 
-export async function deletePlaylist(req: Request) {
+export async function deletePlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
     const playlist = await PlaylistModel.findOneAndDelete({
@@ -75,10 +104,10 @@ export async function deletePlaylist(req: Request) {
     }
     user.playlists.filter((p) => p.id !== playlist.id)
     await user.save()
-    return playlist.id
+    return res.json(playlist.id)
 }
 
-export async function addVideoToPlaylist(req: Request) {
+export async function addVideoToPlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
     const { videoId } = await validateWithSchema(
@@ -94,10 +123,10 @@ export async function addVideoToPlaylist(req: Request) {
     }
     playlist.videos.push(videoId)
     await playlist.save()
-    return playlist.id
+    return res.json(playlist.id)
 }
 
-export async function removeVideoFromPlaylist(req: Request) {
+export async function removeVideoFromPlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
     const { videoId } = await validateWithSchema(
@@ -113,5 +142,21 @@ export async function removeVideoFromPlaylist(req: Request) {
     }
     playlist.videos = playlist.videos.filter((v) => v !== videoId)
     await playlist.save()
-    return playlist.id
+    return res.json(playlist.id)
+}
+
+export async function getPlaylistsByUserId(req: Request, res: Response) {
+    const { userId } = req.params
+    const { limit = "10", skip = "0" } = req.query as {
+        limit?: string
+        skip?: string
+    }
+    const playlists = await PlaylistModel.find({
+        creator: userId,
+    })
+        .limit(parseInt(limit))
+        .skip(parseInt(skip))
+        .orFail()
+
+    return res.json(playlists)
 }

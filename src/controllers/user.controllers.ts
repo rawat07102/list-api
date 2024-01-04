@@ -5,14 +5,15 @@ import { envVars } from "../lib/envVars.js"
 import { IAuthPayload } from "../lib/authGuard.js"
 import { userCredsSchema } from "../schemas/user.schemas.js"
 import { validateWithSchema } from "../lib/validateZodSchema.js"
+import { Playlist } from "../models/playlist.model.js"
 
-export async function getUserById(req: Request) {
+export async function getUserById(req: Request, res: Response) {
     const { id } = req.params
     const user = await UserModel.findById(id).select("-password")
     if (!user) {
         throw new Error("User not found with given id")
     }
-    return user
+    return res.json(user)
 }
 
 export async function getAuthenticatedUser(payload: IAuthPayload | undefined) {
@@ -48,7 +49,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
             password,
         })
         await newUser.save()
-        return newUser
+        return res.json(newUser)
     } catch (err) {
         next(err)
     }
@@ -59,11 +60,8 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         const userCreds = await validateWithSchema(req.body, userCredsSchema)
 
         const { username, password } = userCreds
-        const user = await UserModel.findOne({ username, password })
+        const user = await UserModel.findOne({ username, password }).orFail()
 
-        if (!user) {
-            throw new Error("Invalid user credentials")
-        }
         jwt.sign(
             {
                 username,
@@ -73,11 +71,28 @@ export async function login(req: Request, res: Response, next: NextFunction) {
             (err: Error | null, encoded: string | undefined) => {
                 if (err) throw err
                 let accessToken = encoded
-                return res.json({
-                    accessToken,
-                })
+                return res.json(accessToken)
             }
         )
+    } catch (err) {
+        next(err)
+    }
+}
+
+export async function getUsersPlaylists(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        const { id } = await getAuthenticatedUser(req.user)
+
+        const user = await UserModel.findById(id)
+            .populate<{
+                playlists: Playlist[]
+            }>("playlists")
+            .orFail()
+        return res.json(user.playlists)
     } catch (err) {
         next(err)
     }

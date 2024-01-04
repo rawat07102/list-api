@@ -1,12 +1,12 @@
-import { Schema, model, Types } from "mongoose"
+import { Schema, model, InferSchemaType } from "mongoose"
 
-export interface IUserModel {
-    username: string
-    password: string
-    playlists: Types.ObjectId[]
-}
+// export interface User {
+//     username: string
+//     password: string
+//     playlists: Types.ObjectId[]
+// }
 
-const userSchema = new Schema<IUserModel>({
+const userSchema = new Schema({
     username: { type: String, required: true },
     password: { type: String, required: true },
     playlists: [
@@ -19,4 +19,6 @@ const userSchema = new Schema<IUserModel>({
     ],
 })
 
-export const UserModel = model<IUserModel>("User", userSchema)
+export type User = InferSchemaType<typeof userSchema>
+
+export const UserModel = model<User>("User", userSchema)
