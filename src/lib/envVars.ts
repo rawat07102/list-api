@@ -12,6 +12,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(["development", "production"]).default("development"),
     JWT_SECRET: z.string(),
     CLIENT_ORIGIN: z.string(),
+    YT_API_KEY: z.string(),
 })
 
 const envParseResult = envSchema.safeParse(process.env)

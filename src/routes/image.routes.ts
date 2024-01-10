@@ -4,4 +4,3 @@ import { getImageById } from "../controllers/image.controllers.js"
 export const imageRoutes = Router()
 
 imageRoutes.get("/:id", getImageById)
-

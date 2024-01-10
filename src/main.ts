@@ -6,6 +6,7 @@ import { userRoutes } from "./routes/user.routes.js"
 import { connect as MongooseConnect } from "mongoose"
 import cors from "cors"
 import { imageRoutes } from "./routes/image.routes.js"
+import { youtubeRoutes } from "./routes/youtube.routes.js"
 
 const { PORT, MONGO_URI, CLIENT_ORIGIN } = envVars
 const app = express()
@@ -16,7 +17,9 @@ app.use(
         credentials: true,
     })
 )
+
 app.use("/playlist", playlistRoutes)
+app.use("/youtube", youtubeRoutes)
 app.use("/user", userRoutes)
 app.use("/image", imageRoutes)
 
