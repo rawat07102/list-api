@@ -8,7 +8,7 @@ import { Schema, model, InferSchemaType } from "mongoose"
 
 const playlistSchema = new Schema(
     {
-        name: { type: String, required: true },
+        title: { type: String, required: true },
         creator: { type: Schema.Types.ObjectId, required: true, ref: "User" },
         videos: [{ type: String, default: [] }],
         thumbnail: { type: Schema.Types.ObjectId, ref: "Image" },

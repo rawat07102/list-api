@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload, VerifyCallback } from "jsonwebtoken"
 import { envVars } from "../lib/envVars.js"
 
 export interface IAuthPayload {
@@ -7,14 +7,26 @@ export interface IAuthPayload {
     username: string
 }
 
-export async function authGuard(req: Request, res: Response, next: NextFunction) {
+export async function authGuard(
+    req: Request,
+    _res: Response,
+    next: NextFunction
+) {
     const token = req.headers.authorization?.split(" ")[1]
     if (!token) {
-        return res.status(401).json({
+        return next({
             message: "Un-Authorized",
+            code: 401,
         })
     }
-    const payload = jwt.verify(token, envVars.JWT_SECRET) as IAuthPayload
-    req.user = payload
-    next()
+    jwt.verify(token, envVars.JWT_SECRET, (err, payload) => {
+        if (err) {
+            next({
+                message: "Un-Authorized",
+                code: 401,
+            })
+        }
+        req.user = payload as IAuthPayload
+        next()
+    })
 }

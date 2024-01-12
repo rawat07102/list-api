@@ -79,15 +79,15 @@ export async function createNewPlaylist(req: Request, res: Response) {
 export async function renamePlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
-    const { name } = await validateWithSchema(req.body, renamePlaylistSchema)
+    const { title } = await validateWithSchema(req.body, renamePlaylistSchema)
     const playlist = await PlaylistModel.findOne({
-        id,
-        creator: user,
+        _id: id,
+        creator: user._id,
     })
     if (!playlist) {
         throw Error("Playlist not found")
     }
-    playlist.name = name
+    playlist.title = title
     await playlist.save()
     return res.json(playlist.id)
 }
@@ -96,8 +96,8 @@ export async function deletePlaylist(req: Request, res: Response) {
     const { id } = req.params
     const user = await getAuthenticatedUser(req.user)
     const playlist = await PlaylistModel.findOneAndDelete({
-        id,
-        creator: user,
+        _id: id,
+        creator: user._id,
     })
     if (!playlist) {
         throw Error("Playlist not found")
@@ -120,14 +120,14 @@ export async function addVideoToPlaylist(
             addVideoToPlaylistSchema
         )
         const playlist = await PlaylistModel.findOne({
-            id,
-            creator: user,
+            _id: id,
+            creator: user._id,
         }).orFail()
 
         playlist.videos.push(videoId)
         await playlist.save()
 
-        return res.json(playlist.id)
+        return res.json({ playlistId: playlist._id, videoId })
     } catch (err) {
         next(err)
     }
@@ -141,8 +141,8 @@ export async function removeVideoFromPlaylist(req: Request, res: Response) {
         addVideoToPlaylistSchema
     )
     const playlist = await PlaylistModel.findOne({
-        id,
-        creator: user,
+        _id: id,
+        creator: user._id,
     })
     if (!playlist) {
         throw Error("Playlist not found")
