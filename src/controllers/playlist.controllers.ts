@@ -58,7 +58,7 @@ export async function getAllPlaylist(
     return res.json(playlists)
 }
 
-export async function getPlaylist(req: Request, res: Response) {
+export async function getPlaylistById(req: Request, res: Response) {
     const { id } = req.params
     const playlist = await PlaylistModel.findById(id).orFail()
     return res.json(playlist)

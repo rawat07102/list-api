@@ -87,11 +87,7 @@ export async function getUsersPlaylists(
     try {
         const { id } = await getAuthenticatedUser(req.user)
 
-        const user = await UserModel.findById(id)
-            .populate<{
-                playlists: Playlist[]
-            }>("playlists")
-            .orFail()
+        const user = await UserModel.findById(id).orFail()
         return res.json(user.playlists)
     } catch (err) {
         next(err)

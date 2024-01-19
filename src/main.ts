@@ -27,6 +27,7 @@ app.use(errorHandler)
 
 async function main() {
     try {
+        console.log("Connecting to Database....")
         await MongooseConnect(MONGO_URI)
     } catch (err) {
         console.error("Error connecting MongoDB")

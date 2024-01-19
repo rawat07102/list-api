@@ -8,17 +8,17 @@ axios.defaults.params = { key: envVars.YT_API_KEY }
 axios.defaults.headers.common["Content-Type"] = "application/json"
 
 export async function getVideoById(
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction
 ) {
     try {
-        const videoId = "hY02oEKfPfg"
+        const videoId = req.params.id
         const ytRes = await axios.get<YTResponse<Video>>("/videos", {
             params: {
                 id: videoId,
                 part: "snippet,statistics",
-                fields: "items(id,snippet(title, thumbnails(default), categoryId, publishedAt),statistics(viewCount))",
+                fields: "items(id,snippet(title, thumbnails(medium), categoryId, publishedAt),statistics(viewCount))",
             },
         })
         return res.json(ytRes.data)

@@ -10,7 +10,7 @@ export type Video = {
         title: string
         publishedAt: string
         thumbnails: {
-            default: Thumbnail
+            medium: Thumbnail
         }
         categoryId: string
     }

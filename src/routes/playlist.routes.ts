@@ -3,7 +3,7 @@ import {
     addVideoToPlaylist,
     createNewPlaylist,
     getAllPlaylist,
-    getPlaylist,
+    getPlaylistById,
     getPlaylistsByUserId,
     renamePlaylist,
     uploadThumbnail,
@@ -20,4 +20,4 @@ playlistRoutes.get("/user-playlists/:userId", getPlaylistsByUserId)
 playlistRoutes.post("/:id/change-thumbnail", uploader.single("thumbnail"), uploadThumbnail)
 playlistRoutes.post("/:id/addVideo", authGuard, addVideoToPlaylist)
 playlistRoutes.patch("/:id/removeVideo", authGuard, addVideoToPlaylist)
-playlistRoutes.get("/:id", getPlaylist)
+playlistRoutes.get("/:id", getPlaylistById)
